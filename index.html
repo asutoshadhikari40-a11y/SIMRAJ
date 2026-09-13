@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMRAJ — Our Photobooth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg-main: #0b0c10;
+    --card-bg: rgba(23, 25, 35, 0.75);
+    --card-border: rgba(255, 182, 193, 0.2);
+    --accent: #ff758c;
+    --accent-glow: rgba(255, 117, 140, 0.4);
+    --text-main: #f0f2f5;
+    --text-muted: #a0a5b5;
+    --pill-bg: #181a20;
+    --line: rgba(255, 255, 255, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background-color: var(--bg-main); color: var(--text-main); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 20%, rgba(255, 117, 140, 0.12), transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(255, 126, 179, 0.08), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen { position: relative; z-index: 1; display: none; opacity: 0; transition: opacity 0.4s ease; }
+  .screen.active { display: block; opacity: 1; }
+
+  /* LANDING PAGE */
+  .landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 32px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .nav { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-weight: 700; letter-spacing: 0.1em; font-size: 20px; color: var(--accent); }
+  .btn-pill { background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border: none; padding: 12px 28px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px var(--accent-glow); }
+  .btn-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
+
+  .hero { text-align: center; margin: 100px 0 40px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(42px, 7vw, 80px); font-weight: 700; line-height: 1.1; margin: 0 0 20px; background: linear-gradient(to right, #fff, #ffb6c1); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { font-size: 18px; color: var(--text-muted); max-width: 500px; margin: 0 auto 36px; line-height: 1.6; letter-spacing: 0.02em; }
+  
+  .hero-cta {
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    color: #fff;
+    border: none;
+    padding: 18px 42px;
+    border-radius: 40px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 25px var(--accent-glow);
+    transition: transform 0.2s;
+  }
+  .hero-cta:hover { transform: scale(1.04); }
+
+  .footer-logos { border-top: 1px solid var(--line); padding-top: 30px; text-align: center; }
+  .footer-logos p { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
+
+  /* PHOTOBOOTH APP STYLES */
+  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+  header { text-align: center; margin-bottom: 28px; }
+  header .kicker { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); display: block; margin-bottom: 6px; }
+  header h2 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; margin: 0 0 6px; }
+
+  .stage-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 24px; padding: 20px; border: 1px solid var(--card-border); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+  .stage { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 16px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); }
+  
+  .stage-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; border: 2px stroke rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+  .viewfinder-corner { width: 20px; height: 20px; border: 2px solid rgba(255, 117, 140, 0.4); position: absolute; }
+  .vf-tl { top: 16px; left: 16px; border-right: none; border-bottom: none; }
+  .vf-tr { top: 16px; right: 16px; border-left: none; border-bottom: none; }
+  .vf-bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
+  .vf-br { bottom: 16px; right: 16px; border-left: none; border-top: none; }
+
+  .live-pane { display: flex; width: 100%; height: 100%; }
+  .live-pane video { flex: 1; width: 50%; height: 100%; object-fit: cover; }
+  #liveVideo { transform: scaleX(-1); }
+  .stage img.result { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+
+  .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+  .sticker { position: absolute; font-size: 44px; line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; }
+  .sticker .del { position: absolute; top: -8px; right: -14px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Space Grotesk'; font-weight: bold; }
+
+  .shot-preview-reel { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 8px; background: rgba(0,0,0,0.65); padding: 8px 12px; border-radius: 30px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); max-width: 90%; overflow-x: auto; }
+  .shot-preview-reel img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 110px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 5; text-align: center; flex-direction: column; }
+  .countdown-num.show { display: flex; }
+  .countdown-num span { font-size: 18px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; }
+  
+  .skip-timer-btn { margin-top: 20px; background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border: none; padding: 10px 24px; border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px var(--accent-glow); pointer-events: auto; transition: transform 0.2s; }
+  .skip-timer-btn:hover { transform: scale(1.05); }
+
+  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 6; }
+  .flash.go { animation: flashfx .35s ease-out; }
+  @keyframes flashfx { from { opacity: 0.95; } to { opacity: 0; } }
+
+  .section-label { text-align: center; font-size: 12px; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 24px 0 10px; }
+  .chip-row { display: flex; gap: 8px; justify-content: center; margin: 0 0 6px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--card-border); background: var(--pill-bg); color: var(--text-muted); padding: 8px 18px; border-radius: 30px; font-size: 13px; cursor: pointer; font-family: 'Space Grotesk'; font-weight: 500; transition: all 0.2s; }
+  .chip.active { background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border-color: transparent; font-weight: 600; box-shadow: 0 2px 10px var(--accent-glow); }
+
+  .filters { display: flex; gap: 8px; justify-content: center; margin: 20px 0 6px; flex-wrap: wrap; }
+  .filter-swatch { background: var(--pill-bg); border: 1px solid var(--card-border); border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; padding: 6px 14px; transition: all 0.2s; }
+  .filter-swatch.active { border-color: var(--accent); color: #fff; background: rgba(255, 117, 140, 0.15); }
+
+  .call-row { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+  .call-row input { background: var(--pill-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 10px 16px; color: #fff; font-family: 'Space Grotesk'; font-size: 13px; outline: none; width: 160px; text-align: center; }
+  .call-row input:focus { border-color: var(--accent); }
+  .call-status { font-size: 13px; color: var(--accent); text-align: center; margin: 6px 0; font-weight: 500; }
+
+  .actions { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 26px; }
+  .shutter { width: 76px; height: 76px; border-radius: 50%; border: 4px solid #fff; background: transparent; cursor: pointer; transition: transform .15s ease, box-shadow .2s; position: relative; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+  .shutter::after { content: ""; position: absolute; inset: 5px; background: #fff; border-radius: 50%; transition: background 0.2s; }
+  .shutter:hover { transform: scale(1.05); box-shadow: 0 0 25px var(--accent-glow); }
+  .shutter:hover::after { background: var(--accent); }
+
+  .btn { padding: 12px 26px; border-radius: 30px; border: none; font-family: 'Space Grotesk'; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+  .btn.primary { background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; box-shadow: 0 4px 15px var(--accent-glow); }
+  .btn.ghost { background: var(--pill-bg); color: #fff; border: 1px solid var(--card-border); }
+  .btn.ghost:hover { border-color: var(--accent); }
+
+  .gallery-section { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 30px; }
+  .gallery-section h3 { font-family: 'Playfair Display', serif; font-size: 22px; text-align: center; margin: 0 0 16px; }
+  .gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; }
+  .gallery-item { flex: 0 0 auto; background: #fff; padding: 8px 8px 12px; border-radius: 6px; width: 140px; color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .gallery-item img { width: 100%; height: 140px; object-fit: cover; border-radius: 2px; }
+  .gallery-item .dl { display: block; text-align: center; margin-top: 8px; font-size: 11px; color: #000; text-decoration: none; font-weight: bold; font-family: 'Space Mono', monospace; }
+  
+  .together-panel { display: block; }
+  .live-call-panel, .slotB-upload { display: none; }
+  .live-call-panel.show, .slotB-upload.show { display: block; }
+  .slotB-upload { text-align: center; margin-top: 14px; }
+  .slotB-upload .thumb { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 10px auto 0; display: none; border: 2px solid var(--accent); }
+  .slotB-upload .thumb.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="screen landing active" id="landingScreen">
+  <div class="nav">
+    <div class="logo">SIMRAJ</div>
+    <button class="btn-pill" id="openBoothNavBtn">CLICK HERE PRINCESS 💕</button>
+  </div>
+
+  <div class="hero">
+    <h1>BABY IT'S FOR YOU<br>A SMALL SURPRISE FOR MY PRINCESS.</h1>
+    <p>I LOVE YOU A LOT SIMRIKA, I MISS YOU SO MUCH.</p>
+    <button class="hero-cta" id="openBoothHeroBtn">ENTER OUR PHOTOBOOTH BABY✨</button>
+  </div>
+
+  
+</div>
+
+<div class="screen" id="appScreen">
+  <div class="wrap">
+    <header>
+      <span class="kicker">SIMRAJ Studio</span>
+      <h2>Our Memory Booth</h2>
+    </header>
+
+    <div class="stage-card">
+      <div class="stage" id="stage">
+        <div class="stage-overlay">
+          <div class="viewfinder-corner vf-tl"></div>
+          <div class="viewfinder-corner vf-tr"></div>
+          <div class="viewfinder-corner vf-bl"></div>
+          <div class="viewfinder-corner vf-br"></div>
+        </div>
+        
+        <div class="live-pane" id="livePane">
+          <video id="liveVideo" autoplay playsinline muted></video>
+          <video id="theirVideo" autoplay playsinline style="display:none;"></video>
+        </div>
+        
+        <img id="resultImg" class="result" style="display:none;" alt="Captured strip">
+        <div class="sticker-layer" id="stickerLayer"></div>
+        <div class="shot-preview-reel" id="shotPreviewReel" style="display:none;"></div>
+        <div class="countdown-num" id="countdownNum"></div>
+        <div class="flash" id="flash"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Color Filters</div>
+    <div class="filters" id="filters">
+      <button class="filter-swatch active" data-filter="normal">Natural</button>
+      <button class="filter-swatch" data-filter="clarendon">Clarendon</button>
+      <button class="filter-swatch" data-filter="warm">Warm</button>
+      <button class="filter-swatch" data-filter="cool">Cool Film</button>
+      <button class="filter-swatch" data-filter="golden">Golden Hour</button>
+      <button class="filter-swatch" data-filter="mono">B&W</button>
+      <button class="filter-swatch" data-filter="noir">B&W Contrast</button>
+      <button class="filter-swatch" data-filter="vintage">Warm Vintage</button>
+      <button class="filter-swatch" data-filter="dramatic">Dramatic</button>
+      <button class="filter-swatch" data-filter="vivid">Vivid</button>
+      <button class="filter-swatch" data-filter="cyberpunk">Cyberpunk</button>
+    </div>
+
+    <div class="together-panel">
+      <div class="section-label">How will we take photos?</div>
+      <div class="chip-row">
+        <button class="chip active" data-source="live">Live Call</button>
+        <button class="chip" data-source="upload">Upload Photo</button>
+      </div>
+
+      <div class="live-call-panel show" id="liveCallPanel">
+        <div class="call-row">
+          <button class="btn ghost" id="startCallBtn">Create Room</button>
+          <input type="text" id="joinCodeInput" placeholder="Enter Code">
+          <button class="btn ghost" id="joinCallBtn">Join Room</button>
+        </div>
+        <div class="call-status" id="callStatus">Not connected</div>
+        <button class="btn ghost" id="hangupBtn" style="display:none; margin: 0 auto;">End Call</button>
+      </div>
+
+      <div class="slotB-upload" id="slotBUpload">
+        <label class="chip" for="slotBFile">Choose Simrika's Photo 🌸</label>
+        <input type="file" id="slotBFile" accept="image/*" style="display:none;">
+        <img class="thumb" id="slotBThumb" alt="Partner frame">
+      </div>
+
+      <div class="section-label">Frame Layout</div>
+      <div class="chip-row" id="frameStyleChoice">
+        <button class="chip active" data-layout="side">Side by side</button>
+        <button class="chip" data-layout="single">Single Stream</button>
+      </div>
+    </div>
+
+    <div class="section-label">Pose Grid</div>
+    <div class="chip-row" id="poseChoice">
+      <button class="chip active" data-pose="1">1 </button>
+      <button class="chip" data-pose="2">2 </button>
+      <button class="chip" data-pose="4">4 </button>
+      <button class="chip" data-pose="6">3×3 </button>
+      <button class="chip" data-pose="8">4×2</button>
+    </div>
+
+    <div class="section-label">Cute Stickers</div>
+    <div class="chip-row">
+      <button class="chip" onclick="addSticker('💖')">💖 Heart</button>
+      <button class="chip" onclick="addSticker('🌸')">🌸 Flower</button>
+      <button class="chip" onclick="addSticker('🧸')">🧸 Bear</button>
+      <button class="chip" onclick="addSticker('👑')">👑 Crown</button>
+      <button class="chip" onclick="addSticker('✨')">✨ Sparkle</button>
+      <button class="chip" onclick="addSticker('💌')">💌 Love</button>
+      <button class="chip" id="clearStickersBtn">Clear</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="retakeBtn" style="display:none;">Retake</button>
+      <button class="shutter" id="shutterBtn" aria-label="Take Photo"></button>
+      <button class="btn primary" id="saveBtn" style="display:none;">Save Memory 💕</button>
+    </div>
+
+    <div class="gallery-section">
+      <h3>Our Session Gallery</h3>
+      <div class="gallery" id="gallery"></div>
+    </div>
+  </div>
+</div>
+
+<canvas id="workCanvas" style="display:none;"></canvas>
+
+<script>
+(function(){
+  "use strict";
+
+  const state = {
+    filter: 'normal',
+    frameStyle: 'side',
+    together_source: 'live',
+    poseCount: 1,
+    slotB: null,
+    stream: null,
+    peer: null,
+    call: null,
+    connected: false,
+    stickers: [],
+    lastCapturedFrames: []
+  };
+
+  const FILTERS = {
+    normal:    '',
+    clarendon: 'contrast(1.2) saturate(1.35) brightness(1.05) hue-rotate(-5deg)',
+    warm:      'sepia(0.3) contrast(1.05) brightness(1.02) saturate(1.1)',
+    cool:      'hue-rotate(15deg) contrast(1.05) saturate(0.9)',
+    golden:    'sepia(0.4) saturate(1.4) contrast(1.1) brightness(1.05)',
+    mono:      'grayscale(1) contrast(1.1)',
+    noir:      'grayscale(1) contrast(1.6) brightness(0.9)',
+    vintage:   'sepia(0.55) contrast(0.95) brightness(1.08) hue-rotate(-10deg)',
+    dramatic:  'contrast(1.4) saturate(1.2) brightness(0.95)',
+    vivid:     'saturate(1.8) contrast(1.1)',
+    cyberpunk: 'hue-rotate(180deg) saturate(1.6) contrast(1.2)'
+  };
+
+  const landingScreen = document.getElementById('landingScreen');
+  const appScreen = document.getElementById('appScreen');
+  
+  function openBooth() {
+    landingScreen.classList.remove('active');
+    appScreen.classList.add('active');
+    initCamera();
+    
+    if(state.stickers.length === 0) {
+      addSticker('✨', 0.2, 0.25);
+      addSticker('💖', 0.8, 0.25);
+    }
+  }
+
+  document.getElementById('openBoothNavBtn').addEventListener('click', openBooth);
+  document.getElementById('openBoothHeroBtn').addEventListener('click', openBooth);
+
+  const liveVideo = document.getElementById('liveVideo');
+  const theirVideo = document.getElementById('theirVideo');
+  const shutterBtn = document.getElementById('shutterBtn');
+  const shotPreviewReel = document.getElementById('shotPreviewReel');
+
+  async function initCamera(){
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      state.stream = stream;
+      liveVideo.srcObject = stream;
+    } catch(err) {
+      alert("Please allow camera access so we can take photos together!");
+    }
+  }
+
+  document.querySelectorAll('.filter-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-swatch').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.filter = btn.dataset.filter;
+      
+      liveVideo.style.filter = FILTERS[state.filter];
+      theirVideo.style.filter = FILTERS[state.filter];
+
+      if(state.lastCapturedFrames.length > 0) {
+        lastDataURL = composePhoto(state.lastCapturedFrames);
+        document.getElementById('resultImg').src = lastDataURL;
+      }
+    });
+  });
+
+  document.querySelectorAll('[data-source]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-source]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.together_source = btn.dataset.source;
+      document.getElementById('liveCallPanel').classList.toggle('show', state.together_source === 'live');
+      document.getElementById('slotBUpload').classList.toggle('show', state.together_source === 'upload');
+    });
+  });
+
+  document.querySelectorAll('[data-layout]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-layout]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.frameStyle = btn.dataset.layout;
+    });
+  });
+
+  document.querySelectorAll('#poseChoice .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#poseChoice .chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.poseCount = Number(btn.dataset.pose);
+    });
+  });
+
+  document.getElementById('slotBFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const img = new Image();
+    img.onload = () => {
+      state.slotB = img;
+      const thumb = document.getElementById('slotBThumb');
+      thumb.src = img.src;
+      thumb.classList.add('show');
+    };
+    img.src = URL.createObjectURL(file);
+  });
+
+  function wireCall(call){
+    state.call = call;
+    call.on('stream', remoteStream => {
+      theirVideo.srcObject = remoteStream;
+      theirVideo.style.display = 'block';
+      state.connected = true;
+      document.getElementById('callStatus').textContent = "Connected 💕";
+      document.getElementById('hangupBtn').style.display = 'block';
+    });
+  }
+
+  document.getElementById('startCallBtn').addEventListener('click', () => {
+    if(!state.stream) return;
+    const code = 'simraj-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    state.peer = new Peer(code);
+    state.peer.on('open', () => {
+      document.getElementById('callStatus').textContent = `Room Code: ${code.split('-')[1]}`;
+    });
+    state.peer.on('call', incoming => {
+      incoming.answer(state.stream);
+      wireCall(incoming);
+    });
+  });
+
+  document.getElementById('joinCallBtn').addEventListener('click', () => {
+    const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+    if(!code || !state.stream) return;
+    state.peer = new Peer();
+    state.peer.on('open', () => {
+      const call = state.peer.call('simraj-' + code, state.stream);
+      wireCall(call);
+    });
+  });
+
+  document.getElementById('hangupBtn').addEventListener('click', () => {
+    if(state.call) state.call.close();
+    theirVideo.style.display = 'none';
+    state.connected = false;
+    document.getElementById('callStatus').textContent = "Call ended";
+  });
+
+  window.addSticker = function(emoji, initialXPct = 0.5, initialYPct = 0.5) {
+    const stickerLayer = document.getElementById('stickerLayer');
+    const rec = { emoji, xPct: initialXPct, yPct: initialYPct, el: null };
+    const el = document.createElement('div');
+    el.className = 'sticker';
+    el.textContent = emoji;
+    el.style.left = (initialXPct * 100) + '%';
+    el.style.top = (initialYPct * 100) + '%';
+    
+    const del = document.createElement('span');
+    del.className = 'del';
+    del.textContent = '×';
+    del.onclick = (e) => { e.stopPropagation(); el.remove(); state.stickers = state.stickers.filter(s => s !== rec); };
+    
+    el.appendChild(del);
+    makeDraggable(el, rec);
+    stickerLayer.appendChild(el);
+    rec.el = el;
+    state.stickers.push(rec);
+  };
+
+  document.getElementById('clearStickersBtn').addEventListener('click', () => {
+    state.stickers.forEach(s => s.el.remove());
+    state.stickers = [];
+  });
+
+  function makeDraggable(el, rec) {
+    let dragging = false;
+    const stage = document.getElementById('stage');
+    el.onpointerdown = (e) => { dragging = true; el.setPointerCapture(e.pointerId); };
+    el.onpointermove = (e) => {
+      if(!dragging) return;
+      const r = stage.getBoundingClientRect();
+      rec.xPct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      rec.yPct = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+      el.style.left = (rec.xPct * 100) + '%';
+      el.style.top = (rec.yPct * 100) + '%';
+    };
+    el.onpointerup = () => dragging = false;
+  }
+
+  const workCanvas = document.getElementById('workCanvas');
+  const ctx = workCanvas.getContext('2d');
+
+  function snapshotSource(sourceEl) {
+    const tempCanvas = document.createElement('canvas');
+    const w = sourceEl.videoWidth || sourceEl.naturalWidth || sourceEl.width || 640;
+    const h = sourceEl.videoHeight || sourceEl.naturalHeight || sourceEl.height || 480;
+    tempCanvas.width = w;
+    tempCanvas.height = h;
+    const tCtx = tempCanvas.getContext('2d');
+    tCtx.drawImage(sourceEl, 0, 0, w, h);
+    return tempCanvas;
+  }
+
+  function drawImageCover(context, img, dx, dy, dw, dh, mirror){
+    const iw = img.videoWidth || img.naturalWidth || img.width;
+    const ih = img.videoHeight || img.naturalHeight || img.height;
+    if(!iw || !ih) return;
+    const ir = iw/ih, dr = dw/dh;
+    let sx, sy, sw, sh;
+    if(ir > dr){ sh=ih; sw=ih*dr; sx=(iw-sw)/2; sy=0; }
+    else { sw=iw; sh=iw/dr; sx=0; sy=(ih-sh)/2; }
+    context.save();
+    if(mirror){
+      context.translate(dx+dw, dy);
+      context.scale(-1,1);
+      context.drawImage(img, sx, sy, sw, sh, 0, 0, dw, dh);
+    } else {
+      context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    }
+    context.restore();
+  }
+
+  function drawPairIntoRect(context, x, y, w, h, A, B, style){
+    if(style === 'side' && (state.connected || state.slotB)){
+      const halfW = w / 2;
+      drawImageCover(context, A.img, x, y, halfW, h, A.mirror);
+      drawImageCover(context, B.img, x + halfW, y, halfW, h, B.mirror);
+    } else {
+      drawImageCover(context, A.img, x, y, w, h, A.mirror);
+    }
+  }
+
+  function composeSingleFrameThumbnail(frame) {
+    const c = document.createElement('canvas');
+    c.width = 100; c.height = 100;
+    const context = c.getContext('2d');
+    drawPairIntoRect(context, 0, 0, 100, 100, frame.a, frame.b, state.frameStyle);
+    return c.toDataURL();
+  }
+
+  function composePhoto(framesData) {
+    let cols = 1, rows = 1;
+
+    if(state.poseCount === 8) { cols = 2; rows = 4; }
+    else if(state.poseCount === 6) { cols = 3; rows = 2; }
+    else if(state.poseCount === 2) { cols = 1; rows = 2; }
+    else if(state.poseCount === 4) { cols = 1; rows = 4; }
+
+    const W = 1200;
+    const H = (state.poseCount >= 4) ? 1600 : 1200;
+    workCanvas.width = W;
+    workCanvas.height = H;
+
+    ctx.fillStyle = "#141619";
+    ctx.fillRect(0, 0, W, H);
+
+    const pad = 20;
+    const contentW = W - (pad * 2);
+    const contentH = H - (pad * 2);
+
+    const gap = 12;
+    const cellW = (contentW - (cols - 1) * gap) / cols;
+    const cellH = (contentH - (rows - 1) * gap) / rows;
+
+    ctx.save();
+    if(FILTERS[state.filter]) ctx.filter = FILTERS[state.filter];
+
+    for(let i = 0; i < state.poseCount; i++){
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const cx = pad + c * (cellW + gap);
+      const cy = pad + r * (cellH + gap);
+
+      if (i < framesData.length) {
+        const frame = framesData[i];
+        drawPairIntoRect(ctx, cx, cy, cellW, cellH, frame.a, frame.b, state.frameStyle);
+      }
+    }
+    ctx.restore();
+
+    ctx.font = `${W * 0.05}px sans-serif`;
+    state.stickers.forEach(s => {
+      ctx.fillText(s.emoji, pad + s.xPct * contentW, pad + s.yPct * contentH);
+    });
+
+    return workCanvas.toDataURL('image/jpeg', 0.95);
+  }
+
+  let lastDataURL = null;
+
+  async function captureFrame() {
+    document.getElementById('flash').classList.add('go');
+    setTimeout(() => document.getElementById('flash').classList.remove('go'), 350);
+
+    const snapA = snapshotSource(liveVideo);
+    let snapB = state.connected ? snapshotSource(theirVideo) : snapA;
+    if(state.together_source === 'upload' && state.slotB) snapB = state.slotB;
+
+    return {
+      a: { img: snapA, mirror: true },
+      b: { img: snapB, mirror: false }
+    };
+  }
+
+  function countdown(sec, labelText, allowSkip = false) {
+    return new Promise(resolve => {
+      const el = document.getElementById('countdownNum');
+      let c = sec;
+      
+      let skipBtnHTML = allowSkip ? `<button class="skip-timer-btn" id="skipTimerBtn">Ready Now! ✨</button>` : '';
+      el.innerHTML = `${c}<span>${labelText}</span>${skipBtnHTML}`;
+      el.classList.add('show');
+      
+      let timer = null;
+
+      const cleanUp = () => {
+        clearInterval(timer);
+        el.classList.remove('show');
+        resolve();
+      };
+
+      if(allowSkip) {
+        setTimeout(() => {
+          const skipBtn = document.getElementById('skipTimerBtn');
+          if(skipBtn) skipBtn.onclick = cleanUp;
+        }, 50);
+      }
+
+      timer = setInterval(() => {
+        c--;
+        if(c > 0) {
+          el.innerHTML = `${c}<span>${labelText}</span>${skipBtnHTML}`;
+          if(allowSkip) {
+            const skipBtn = document.getElementById('skipTimerBtn');
+            if(skipBtn) skipBtn.onclick = cleanUp;
+          }
+        } else {
+          cleanUp();
+        }
+      }, 1000);
+    });
+  }
+
+  shutterBtn.addEventListener('click', async () => {
+    shutterBtn.disabled = true;
+    shotPreviewReel.innerHTML = '';
+    shotPreviewReel.style.display = 'flex';
+
+    const frames = [];
+    const count = state.poseCount;
+
+    for(let i = 0; i < count; i++){
+      if(i > 0) {
+        await countdown(30, `Prepare Pose ${i + 1} of ${count}`, true);
+      }
+      
+      await countdown(3, `Smile! Pose ${i + 1} of ${count}`);
+      const captured = await captureFrame();
+      frames.push(captured);
+      
+      const thumbImg = document.createElement('img');
+      thumbImg.src = composeSingleFrameThumbnail(captured);
+      shotPreviewReel.appendChild(thumbImg);
+    }
+
+    state.lastCapturedFrames = frames;
+    lastDataURL = composePhoto(frames);
+    document.getElementById('resultImg').src = lastDataURL;
+    document.getElementById('resultImg').style.display = 'block';
+    document.getElementById('livePane').style.display = 'none';
+    shotPreviewReel.style.display = 'none';
+
+    shutterBtn.style.display = 'none';
+    document.getElementById('retakeBtn').style.display = 'inline-block';
+    document.getElementById('saveBtn').style.display = 'inline-block';
+  });
+
+  document.getElementById('retakeBtn').addEventListener('click', () => {
+    state.lastCapturedFrames = [];
+    document.getElementById('resultImg').style.display = 'none';
+    document.getElementById('livePane').style.display = 'flex';
+    shutterBtn.style.display = 'block';
+    shutterBtn.disabled = false;
+    document.getElementById('retakeBtn').style.display = 'none';
+    document.getElementById('saveBtn').style.display = 'none';
+    shotPreviewReel.innerHTML = '';
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    if(!lastDataURL) return;
+    const gallery = document.getElementById('gallery');
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.innerHTML = `<img src="${lastDataURL}"><a class="dl" href="${lastDataURL}" download="simraj-strip.jpg">SAVE ↓</a>`;
+    gallery.prepend(item);
+  });
+})();
+</script>
+</body>
+</html>
