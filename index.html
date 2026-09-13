@@ -73,8 +73,8 @@
   }
   .hero-cta:hover { transform: scale(1.04); }
 
-  /* PHOTOBOOTH APP STYLES */
-  .wrap { max-width: 1050px; margin: 0 auto; padding: 20px 16px 80px; }
+  /* PHOTOBOOTH APP STYLES - EXPANDED */
+  .wrap { max-width: 1300px; margin: 0 auto; padding: 20px 16px 80px; }
   header { text-align: center; margin-bottom: 24px; }
   header .kicker { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); display: block; margin-bottom: 6px; }
   header h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 700; margin: 0 0 6px; }
@@ -83,7 +83,7 @@
   .stage { 
     position: relative; 
     width: 100%; 
-    height: clamp(360px, 65vh, 680px); 
+    height: clamp(500px, 80vh, 850px); 
     border-radius: 16px; 
     overflow: hidden; 
     background: #000; 
@@ -94,7 +94,7 @@
   }
   
   .stage-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; border: 2px stroke rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
-  .viewfinder-corner { width: 20px; height: 20px; border: 2px solid rgba(255, 117, 140, 0.4); position: absolute; }
+  .viewfinder-corner { width: 24px; height: 24px; border: 3px solid rgba(255, 117, 140, 0.5); position: absolute; }
   .vf-tl { top: 16px; left: 16px; border-right: none; border-bottom: none; }
   .vf-tr { top: 16px; right: 16px; border-left: none; border-bottom: none; }
   .vf-bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
@@ -108,13 +108,13 @@
   .stage img.result { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
 
   .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
-  .sticker { position: absolute; font-size: clamp(32px, 5vw, 48px); line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; display: inline-block; }
+  .sticker { position: absolute; font-size: clamp(38px, 6vw, 64px); line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; display: inline-block; }
   .sticker .del { 
     position: absolute; 
     top: -12px; 
     right: -12px; 
-    width: 24px; 
-    height: 24px; 
+    width: 26px; 
+    height: 26px; 
     border-radius: 50%; 
     background: var(--accent); 
     color: #fff; 
@@ -595,7 +595,6 @@
     del.className = 'del';
     del.textContent = '×';
 
-    // Prevent pointer drag events from intercepting the deletion click
     const removeFn = (e) => {
       e.preventDefault();
       e.stopPropagation(); 
