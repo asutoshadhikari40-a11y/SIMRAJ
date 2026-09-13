@@ -43,7 +43,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 32px 40px;
+    padding: 32px 20px;
     max-width: 1200px;
     margin: 0 auto;
   }
@@ -52,8 +52,8 @@
   .btn-pill { background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border: none; padding: 12px 28px; border-radius: 40px; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px var(--accent-glow); }
   .btn-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
 
-  .hero { text-align: center; margin: 100px 0 40px; }
-  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(42px, 7vw, 80px); font-weight: 700; line-height: 1.1; margin: 0 0 20px; background: linear-gradient(to right, #fff, #ffb6c1); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero { text-align: center; margin: 80px 0 40px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(36px, 7vw, 80px); font-weight: 700; line-height: 1.1; margin: 0 0 20px; background: linear-gradient(to right, #fff, #ffb6c1); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .hero p { font-size: 18px; color: var(--text-muted); max-width: 500px; margin: 0 auto 36px; line-height: 1.6; letter-spacing: 0.02em; }
   
   .hero-cta {
@@ -73,17 +73,25 @@
   }
   .hero-cta:hover { transform: scale(1.04); }
 
-  .footer-logos { border-top: 1px solid var(--line); padding-top: 30px; text-align: center; }
-  .footer-logos p { font-size: 12px; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px; }
-
   /* PHOTOBOOTH APP STYLES */
-  .wrap { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
-  header { text-align: center; margin-bottom: 28px; }
+  .wrap { max-width: 1050px; margin: 0 auto; padding: 20px 16px 80px; }
+  header { text-align: center; margin-bottom: 24px; }
   header .kicker { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); display: block; margin-bottom: 6px; }
-  header h2 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; margin: 0 0 6px; }
+  header h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 700; margin: 0 0 6px; }
 
-  .stage-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 24px; padding: 20px; border: 1px solid var(--card-border); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
-  .stage { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 16px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid var(--line); }
+  .stage-card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 24px; padding: 16px; border: 1px solid var(--card-border); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+  .stage { 
+    position: relative; 
+    width: 100%; 
+    height: clamp(360px, 65vh, 680px); 
+    border-radius: 16px; 
+    overflow: hidden; 
+    background: #000; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 1px solid var(--line); 
+  }
   
   .stage-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; border: 2px stroke rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
   .viewfinder-corner { width: 20px; height: 20px; border: 2px solid rgba(255, 117, 140, 0.4); position: absolute; }
@@ -92,22 +100,24 @@
   .vf-bl { bottom: 16px; left: 16px; border-right: none; border-top: none; }
   .vf-br { bottom: 16px; right: 16px; border-left: none; border-top: none; }
 
-  .live-pane { display: flex; width: 100%; height: 100%; }
+  .live-pane { display: flex; width: 100%; height: 100%; position: relative; background: #000; }
   .live-pane video { flex: 1; width: 50%; height: 100%; object-fit: cover; }
+  .live-pane video.full-width { width: 100%; flex: 1 1 100%; }
   #liveVideo { transform: scaleX(-1); }
+  #theirVideo { transform: scaleX(-1); }
   .stage img.result { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
 
-  .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-  .sticker { position: absolute; font-size: 44px; line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; }
-  .sticker .del { position: absolute; top: -8px; right: -14px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Space Grotesk'; font-weight: bold; }
+  .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+  .sticker { position: absolute; font-size: clamp(32px, 5vw, 48px); line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; display: inline-block; }
+  .sticker .del { position: absolute; top: -10px; right: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Space Grotesk'; font-weight: bold; border: 1px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
 
   .shot-preview-reel { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 8px; background: rgba(0,0,0,0.65); padding: 8px 12px; border-radius: 30px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); max-width: 90%; overflow-x: auto; }
   .shot-preview-reel img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 110px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 5; text-align: center; flex-direction: column; }
+  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: clamp(60px, 12vw, 110px); font-weight: 700; color: #fff; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 5; text-align: center; flex-direction: column; }
   .countdown-num.show { display: flex; }
-  .countdown-num span { font-size: 18px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; }
+  .countdown-num span { font-size: 16px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; padding: 0 10px; }
   
   .skip-timer-btn { margin-top: 20px; background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border: none; padding: 10px 24px; border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px var(--accent-glow); pointer-events: auto; transition: transform 0.2s; }
   .skip-timer-btn:hover { transform: scale(1.05); }
@@ -143,9 +153,9 @@
 
   .gallery-section { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 30px; }
   .gallery-section h3 { font-family: 'Playfair Display', serif; font-size: 22px; text-align: center; margin: 0 0 16px; }
-  .gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; }
-  .gallery-item { flex: 0 0 auto; background: #fff; padding: 8px 8px 12px; border-radius: 6px; width: 140px; color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .gallery-item img { width: 100%; height: 140px; object-fit: cover; border-radius: 2px; }
+  .gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; justify-content: center; }
+  .gallery-item { flex: 0 0 auto; background: #fff; padding: 8px 8px 12px; border-radius: 6px; width: 150px; color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .gallery-item img { width: 100%; height: auto; object-fit: cover; border-radius: 2px; }
   .gallery-item .dl { display: block; text-align: center; margin-top: 8px; font-size: 11px; color: #000; text-decoration: none; font-weight: bold; font-family: 'Space Mono', monospace; }
   
   .together-panel { display: block; }
@@ -169,8 +179,6 @@
     <p>I LOVE YOU A LOT SIMRIKA, I MISS YOU SO MUCH.</p>
     <button class="hero-cta" id="openBoothHeroBtn">ENTER OUR PHOTOBOOTH BABY✨</button>
   </div>
-
-  
 </div>
 
 <div class="screen" id="appScreen">
@@ -190,7 +198,7 @@
         </div>
         
         <div class="live-pane" id="livePane">
-          <video id="liveVideo" autoplay playsinline muted></video>
+          <video id="liveVideo" class="full-width" autoplay playsinline muted></video>
           <video id="theirVideo" autoplay playsinline style="display:none;"></video>
         </div>
         
@@ -258,12 +266,12 @@
 
     <div class="section-label">Cute Stickers</div>
     <div class="chip-row">
-      <button class="chip" onclick="addSticker('💖')">💖 Heart</button>
-      <button class="chip" onclick="addSticker('🌸')">🌸 Flower</button>
-      <button class="chip" onclick="addSticker('🧸')">🧸 Bear</button>
-      <button class="chip" onclick="addSticker('👑')">👑 Crown</button>
-      <button class="chip" onclick="addSticker('✨')">✨ Sparkle</button>
-      <button class="chip" onclick="addSticker('💌')">💌 Love</button>
+      <button class="chip" onclick="addStickerWithSync('💖')">💖 Heart</button>
+      <button class="chip" onclick="addStickerWithSync('🌸')">🌸 Flower</button>
+      <button class="chip" onclick="addStickerWithSync('🧸')">🧸 Bear</button>
+      <button class="chip" onclick="addStickerWithSync('👑')">👑 Crown</button>
+      <button class="chip" onclick="addStickerWithSync('✨')">✨ Sparkle</button>
+      <button class="chip" onclick="addStickerWithSync('💌')">💌 Love</button>
       <button class="chip" id="clearStickersBtn">Clear</button>
     </div>
 
@@ -295,6 +303,7 @@
     stream: null,
     peer: null,
     call: null,
+    dataConn: null,
     connected: false,
     stickers: [],
     lastCapturedFrames: []
@@ -316,25 +325,28 @@
 
   const landingScreen = document.getElementById('landingScreen');
   const appScreen = document.getElementById('appScreen');
-  
+  const liveVideo = document.getElementById('liveVideo');
+  const theirVideo = document.getElementById('theirVideo');
+  const shutterBtn = document.getElementById('shutterBtn');
+  const shotPreviewReel = document.getElementById('shotPreviewReel');
+  const workCanvas = document.getElementById('workCanvas');
+  const ctx = workCanvas.getContext('2d');
+  let activeCountdownResolver = null;
+  let lastDataURL = null;
+
   function openBooth() {
     landingScreen.classList.remove('active');
     appScreen.classList.add('active');
     initCamera();
     
     if(state.stickers.length === 0) {
-      addSticker('✨', 0.2, 0.25);
-      addSticker('💖', 0.8, 0.25);
+      addSticker('✨', 'stk_init_1', 0.2, 0.25, false);
+      addSticker('💖', 'stk_init_2', 0.8, 0.25, false);
     }
   }
 
   document.getElementById('openBoothNavBtn').addEventListener('click', openBooth);
   document.getElementById('openBoothHeroBtn').addEventListener('click', openBooth);
-
-  const liveVideo = document.getElementById('liveVideo');
-  const theirVideo = document.getElementById('theirVideo');
-  const shutterBtn = document.getElementById('shutterBtn');
-  const shotPreviewReel = document.getElementById('shotPreviewReel');
 
   async function initCamera(){
     try {
@@ -346,48 +358,192 @@
     }
   }
 
-  document.querySelectorAll('.filter-swatch').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-swatch').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.filter = btn.dataset.filter;
-      
-      liveVideo.style.filter = FILTERS[state.filter];
-      theirVideo.style.filter = FILTERS[state.filter];
+  /* PEERJS DATA SYNC SYSTEM */
+  function sendSync(type, payload) {
+    if (state.dataConn && state.dataConn.open) {
+      state.dataConn.send({ type, payload });
+    }
+  }
 
-      if(state.lastCapturedFrames.length > 0) {
-        lastDataURL = composePhoto(state.lastCapturedFrames);
-        document.getElementById('resultImg').src = lastDataURL;
-      }
+  function handleSyncData(data) {
+    if (!data || !data.type) return;
+
+    switch(data.type) {
+      case 'SET_FILTER':
+        applyFilter(data.payload.filter, false);
+        break;
+      case 'SET_SOURCE':
+        applySource(data.payload.source, false);
+        break;
+      case 'SET_LAYOUT':
+        applyLayout(data.payload.layout, false);
+        break;
+      case 'SET_POSE':
+        applyPose(data.payload.pose, false);
+        break;
+      case 'ADD_STICKER':
+        addSticker(data.payload.emoji, data.payload.id, data.payload.xPct, data.payload.yPct, false);
+        break;
+      case 'MOVE_STICKER':
+        moveStickerLocally(data.payload.id, data.payload.xPct, data.payload.yPct);
+        break;
+      case 'DELETE_STICKER':
+        deleteStickerLocally(data.payload.id);
+        break;
+      case 'CLEAR_STICKERS':
+        clearStickersLocally();
+        break;
+      case 'START_CAPTURE':
+        triggerPhotoSequence(false);
+        break;
+      case 'SKIP_TIMER':
+        if(activeCountdownResolver) activeCountdownResolver();
+        break;
+    }
+  }
+
+  function setupDataConnection(conn) {
+    state.dataConn = conn;
+    conn.on('data', handleSyncData);
+    conn.on('open', () => {
+      // Sync initial state when connected
+      sendSync('SET_FILTER', { filter: state.filter });
+      sendSync('SET_LAYOUT', { layout: state.frameStyle });
+      sendSync('SET_POSE', { pose: state.poseCount });
+      sendSync('CLEAR_STICKERS', {});
+      state.stickers.forEach(s => {
+        sendSync('ADD_STICKER', { id: s.id, emoji: s.emoji, xPct: s.xPct, yPct: s.yPct });
+      });
     });
+  }
+
+  /* UI CONTROL FUNCTIONS WITH SYNC */
+  function applyFilter(filterKey, notifyPeer = true) {
+    state.filter = filterKey;
+    document.querySelectorAll('.filter-swatch').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === filterKey);
+    });
+    
+    liveVideo.style.filter = FILTERS[filterKey];
+    theirVideo.style.filter = FILTERS[filterKey];
+
+    if(state.lastCapturedFrames.length > 0) {
+      lastDataURL = composePhoto(state.lastCapturedFrames);
+      document.getElementById('resultImg').src = lastDataURL;
+    }
+    if(notifyPeer) sendSync('SET_FILTER', { filter: filterKey });
+  }
+
+  document.querySelectorAll('.filter-swatch').forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.dataset.filter, true));
   });
+
+  function applySource(sourceKey, notifyPeer = true) {
+    state.together_source = sourceKey;
+    document.querySelectorAll('[data-source]').forEach(b => {
+      b.classList.toggle('active', b.dataset.source === sourceKey);
+    });
+    document.getElementById('liveCallPanel').classList.toggle('show', sourceKey === 'live');
+    document.getElementById('slotBUpload').classList.toggle('show', sourceKey === 'upload');
+    updateVideoDimensions();
+    if(notifyPeer) sendSync('SET_SOURCE', { source: sourceKey });
+  }
 
   document.querySelectorAll('[data-source]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-source]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.together_source = btn.dataset.source;
-      document.getElementById('liveCallPanel').classList.toggle('show', state.together_source === 'live');
-      document.getElementById('slotBUpload').classList.toggle('show', state.together_source === 'upload');
-    });
+    btn.addEventListener('click', () => applySource(btn.dataset.source, true));
   });
+
+  function applyLayout(layoutKey, notifyPeer = true) {
+    state.frameStyle = layoutKey;
+    document.querySelectorAll('[data-layout]').forEach(b => {
+      b.classList.toggle('active', b.dataset.layout === layoutKey);
+    });
+    if(notifyPeer) sendSync('SET_LAYOUT', { layout: layoutKey });
+  }
 
   document.querySelectorAll('[data-layout]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-layout]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.frameStyle = btn.dataset.layout;
-    });
+    btn.addEventListener('click', () => applyLayout(btn.dataset.layout, true));
   });
+
+  function applyPose(poseNum, notifyPeer = true) {
+    state.poseCount = Number(poseNum);
+    document.querySelectorAll('#poseChoice .chip').forEach(b => {
+      b.classList.toggle('active', Number(b.dataset.pose) === state.poseCount);
+    });
+    if(notifyPeer) sendSync('SET_POSE', { pose: state.poseCount });
+  }
 
   document.querySelectorAll('#poseChoice .chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#poseChoice .chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.poseCount = Number(btn.dataset.pose);
+    btn.addEventListener('click', () => applyPose(btn.dataset.pose, true));
+  });
+
+  function updateVideoDimensions() {
+    if (state.connected && state.together_source === 'live') {
+      liveVideo.classList.remove('full-width');
+      theirVideo.style.display = 'block';
+    } else {
+      liveVideo.classList.add('full-width');
+      theirVideo.style.display = 'none';
+    }
+  }
+
+  /* PEER CONNECTION SETUP */
+  function wireCall(call){
+    state.call = call;
+    call.on('stream', remoteStream => {
+      theirVideo.srcObject = remoteStream;
+      state.connected = true;
+      updateVideoDimensions();
+      document.getElementById('callStatus').textContent = "Connected 💕";
+      document.getElementById('hangupBtn').style.display = 'block';
+    });
+  }
+
+  document.getElementById('startCallBtn').addEventListener('click', () => {
+    if(!state.stream) return;
+    const rawId = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const code = 'simraj-' + rawId;
+    state.peer = new Peer(code);
+    
+    state.peer.on('open', () => {
+      document.getElementById('callStatus').textContent = `Room Code: ${rawId}`;
+    });
+    
+    state.peer.on('call', incoming => {
+      incoming.answer(state.stream);
+      wireCall(incoming);
+    });
+
+    state.peer.on('connection', conn => {
+      setupDataConnection(conn);
     });
   });
 
+  document.getElementById('joinCallBtn').addEventListener('click', () => {
+    const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+    if(!code || !state.stream) return;
+    state.peer = new Peer();
+    
+    state.peer.on('open', () => {
+      const peerId = 'simraj-' + code;
+      const call = state.peer.call(peerId, state.stream);
+      wireCall(call);
+      
+      const conn = state.peer.connect(peerId);
+      setupDataConnection(conn);
+    });
+  });
+
+  document.getElementById('hangupBtn').addEventListener('click', () => {
+    if(state.call) state.call.close();
+    if(state.dataConn) state.dataConn.close();
+    state.connected = false;
+    updateVideoDimensions();
+    document.getElementById('callStatus').textContent = "Call ended";
+    document.getElementById('hangupBtn').style.display = 'none';
+  });
+
+  /* UPLOAD PARTNER PHOTO */
   document.getElementById('slotBFile').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if(!file) return;
@@ -401,91 +557,101 @@
     img.src = URL.createObjectURL(file);
   });
 
-  function wireCall(call){
-    state.call = call;
-    call.on('stream', remoteStream => {
-      theirVideo.srcObject = remoteStream;
-      theirVideo.style.display = 'block';
-      state.connected = true;
-      document.getElementById('callStatus').textContent = "Connected 💕";
-      document.getElementById('hangupBtn').style.display = 'block';
-    });
-  }
+  /* STICKER SYSTEM WITH BIDIRECTIONAL SYNC */
+  window.addStickerWithSync = function(emoji) {
+    const id = 'stk_' + Math.random().toString(36).substr(2, 9);
+    addSticker(emoji, id, 0.5, 0.5, true);
+  };
 
-  document.getElementById('startCallBtn').addEventListener('click', () => {
-    if(!state.stream) return;
-    const code = 'simraj-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-    state.peer = new Peer(code);
-    state.peer.on('open', () => {
-      document.getElementById('callStatus').textContent = `Room Code: ${code.split('-')[1]}`;
-    });
-    state.peer.on('call', incoming => {
-      incoming.answer(state.stream);
-      wireCall(incoming);
-    });
-  });
-
-  document.getElementById('joinCallBtn').addEventListener('click', () => {
-    const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
-    if(!code || !state.stream) return;
-    state.peer = new Peer();
-    state.peer.on('open', () => {
-      const call = state.peer.call('simraj-' + code, state.stream);
-      wireCall(call);
-    });
-  });
-
-  document.getElementById('hangupBtn').addEventListener('click', () => {
-    if(state.call) state.call.close();
-    theirVideo.style.display = 'none';
-    state.connected = false;
-    document.getElementById('callStatus').textContent = "Call ended";
-  });
-
-  window.addSticker = function(emoji, initialXPct = 0.5, initialYPct = 0.5) {
+  function addSticker(emoji, id, initialXPct = 0.5, initialYPct = 0.5, notifyPeer = true) {
     const stickerLayer = document.getElementById('stickerLayer');
-    const rec = { emoji, xPct: initialXPct, yPct: initialYPct, el: null };
+    const rec = { id, emoji, xPct: initialXPct, yPct: initialYPct, el: null };
+    
     const el = document.createElement('div');
     el.className = 'sticker';
-    el.textContent = emoji;
+    el.innerHTML = `${emoji}`;
     el.style.left = (initialXPct * 100) + '%';
     el.style.top = (initialYPct * 100) + '%';
     
     const del = document.createElement('span');
     del.className = 'del';
     del.textContent = '×';
-    del.onclick = (e) => { e.stopPropagation(); el.remove(); state.stickers = state.stickers.filter(s => s !== rec); };
+    del.onclick = (e) => { 
+      e.stopPropagation(); 
+      deleteStickerLocally(id);
+      sendSync('DELETE_STICKER', { id });
+    };
     
     el.appendChild(del);
     makeDraggable(el, rec);
     stickerLayer.appendChild(el);
     rec.el = el;
     state.stickers.push(rec);
-  };
+
+    if (notifyPeer) {
+      sendSync('ADD_STICKER', { id, emoji, xPct: initialXPct, yPct: initialYPct });
+    }
+  }
+
+  function moveStickerLocally(id, xPct, yPct) {
+    const rec = state.stickers.find(s => s.id === id);
+    if (rec && rec.el) {
+      rec.xPct = xPct;
+      rec.yPct = yPct;
+      rec.el.style.left = (xPct * 100) + '%';
+      rec.el.style.top = (yPct * 100) + '%';
+    }
+  }
+
+  function deleteStickerLocally(id) {
+    const index = state.stickers.findIndex(s => s.id === id);
+    if (index !== -1) {
+      if (state.stickers[index].el) state.stickers[index].el.remove();
+      state.stickers.splice(index, 1);
+    }
+  }
+
+  function clearStickersLocally() {
+    state.stickers.forEach(s => { if (s.el) s.el.remove(); });
+    state.stickers = [];
+  }
 
   document.getElementById('clearStickersBtn').addEventListener('click', () => {
-    state.stickers.forEach(s => s.el.remove());
-    state.stickers = [];
+    clearStickersLocally();
+    sendSync('CLEAR_STICKERS', {});
   });
 
   function makeDraggable(el, rec) {
     let dragging = false;
     const stage = document.getElementById('stage');
-    el.onpointerdown = (e) => { dragging = true; el.setPointerCapture(e.pointerId); };
-    el.onpointermove = (e) => {
+    
+    const onStart = (e) => {
+      dragging = true;
+      el.setPointerCapture(e.pointerId);
+    };
+
+    const onMove = (e) => {
       if(!dragging) return;
       const r = stage.getBoundingClientRect();
-      rec.xPct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-      rec.yPct = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
-      el.style.left = (rec.xPct * 100) + '%';
-      el.style.top = (rec.yPct * 100) + '%';
+      const xPct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      const yPct = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+      
+      rec.xPct = xPct;
+      rec.yPct = yPct;
+      el.style.left = (xPct * 100) + '%';
+      el.style.top = (yPct * 100) + '%';
+      
+      sendSync('MOVE_STICKER', { id: rec.id, xPct, yPct });
     };
-    el.onpointerup = () => dragging = false;
+
+    const onEnd = () => { dragging = false; };
+
+    el.onpointerdown = onStart;
+    el.onpointermove = onMove;
+    el.onpointerup = onEnd;
   }
 
-  const workCanvas = document.getElementById('workCanvas');
-  const ctx = workCanvas.getContext('2d');
-
+  /* PHOTO CAPTURE & COMPOSITION ENGINE */
   function snapshotSource(sourceEl) {
     const tempCanvas = document.createElement('canvas');
     const w = sourceEl.videoWidth || sourceEl.naturalWidth || sourceEl.width || 640;
@@ -528,9 +694,9 @@
 
   function composeSingleFrameThumbnail(frame) {
     const c = document.createElement('canvas');
-    c.width = 100; c.height = 100;
+    c.width = 120; c.height = 120;
     const context = c.getContext('2d');
-    drawPairIntoRect(context, 0, 0, 100, 100, frame.a, frame.b, state.frameStyle);
+    drawPairIntoRect(context, 0, 0, 120, 120, frame.a, frame.b, state.frameStyle);
     return c.toDataURL();
   }
 
@@ -550,11 +716,11 @@
     ctx.fillStyle = "#141619";
     ctx.fillRect(0, 0, W, H);
 
-    const pad = 20;
+    const pad = 24;
     const contentW = W - (pad * 2);
     const contentH = H - (pad * 2);
 
-    const gap = 12;
+    const gap = 14;
     const cellW = (contentW - (cols - 1) * gap) / cols;
     const cellH = (contentH - (rows - 1) * gap) / rows;
 
@@ -574,15 +740,13 @@
     }
     ctx.restore();
 
-    ctx.font = `${W * 0.05}px sans-serif`;
+    ctx.font = `${W * 0.045}px sans-serif`;
     state.stickers.forEach(s => {
       ctx.fillText(s.emoji, pad + s.xPct * contentW, pad + s.yPct * contentH);
     });
 
     return workCanvas.toDataURL('image/jpeg', 0.95);
   }
-
-  let lastDataURL = null;
 
   async function captureFrame() {
     document.getElementById('flash').classList.add('go');
@@ -600,6 +764,7 @@
 
   function countdown(sec, labelText, allowSkip = false) {
     return new Promise(resolve => {
+      activeCountdownResolver = resolve;
       const el = document.getElementById('countdownNum');
       let c = sec;
       
@@ -612,24 +777,28 @@
       const cleanUp = () => {
         clearInterval(timer);
         el.classList.remove('show');
+        activeCountdownResolver = null;
         resolve();
       };
 
-      if(allowSkip) {
-        setTimeout(() => {
-          const skipBtn = document.getElementById('skipTimerBtn');
-          if(skipBtn) skipBtn.onclick = cleanUp;
-        }, 50);
-      }
+      const bindSkip = () => {
+        if(!allowSkip) return;
+        const skipBtn = document.getElementById('skipTimerBtn');
+        if(skipBtn) {
+          skipBtn.onclick = () => {
+            sendSync('SKIP_TIMER', {});
+            cleanUp();
+          };
+        }
+      };
+
+      bindSkip();
 
       timer = setInterval(() => {
         c--;
         if(c > 0) {
           el.innerHTML = `${c}<span>${labelText}</span>${skipBtnHTML}`;
-          if(allowSkip) {
-            const skipBtn = document.getElementById('skipTimerBtn');
-            if(skipBtn) skipBtn.onclick = cleanUp;
-          }
+          bindSkip();
         } else {
           cleanUp();
         }
@@ -637,7 +806,9 @@
     });
   }
 
-  shutterBtn.addEventListener('click', async () => {
+  async function triggerPhotoSequence(notifyPeer = true) {
+    if (notifyPeer) sendSync('START_CAPTURE', {});
+
     shutterBtn.disabled = true;
     shotPreviewReel.innerHTML = '';
     shotPreviewReel.style.display = 'flex';
@@ -647,7 +818,7 @@
 
     for(let i = 0; i < count; i++){
       if(i > 0) {
-        await countdown(30, `Prepare Pose ${i + 1} of ${count}`, true);
+        await countdown(15, `Prepare Pose ${i + 1} of ${count}`, true);
       }
       
       await countdown(3, `Smile! Pose ${i + 1} of ${count}`);
@@ -669,7 +840,9 @@
     shutterBtn.style.display = 'none';
     document.getElementById('retakeBtn').style.display = 'inline-block';
     document.getElementById('saveBtn').style.display = 'inline-block';
-  });
+  }
+
+  shutterBtn.addEventListener('click', () => triggerPhotoSequence(true));
 
   document.getElementById('retakeBtn').addEventListener('click', () => {
     state.lastCapturedFrames = [];
