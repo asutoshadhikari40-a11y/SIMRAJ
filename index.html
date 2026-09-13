@@ -134,7 +134,15 @@
 
   #liveVideo { transform: scaleX(-1); }
   #theirVideo { transform: scaleX(-1); }
-  .stage img.result { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+
+  /* Updated to ensure clicked photo expands to fill the entire container */
+  .stage img.result { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    display: block; 
+    background: #000; 
+  }
 
   .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
   .sticker { position: absolute; font-size: clamp(38px, 6vw, 64px); line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; display: inline-block; }
@@ -763,8 +771,9 @@
     else if(state.poseCount === 2) { cols = 1; rows = 2; }
     else if(state.poseCount === 4) { cols = 1; rows = 4; }
 
-    const W = 1200;
-    const H = (state.poseCount >= 4) ? 1600 : 1200;
+    /* Matches the 16:9 stage layout aspect ratio */
+    const W = 1600;
+    const H = 900;
     workCanvas.width = W;
     workCanvas.height = H;
 
