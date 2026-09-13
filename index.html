@@ -109,7 +109,26 @@
 
   .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
   .sticker { position: absolute; font-size: clamp(32px, 5vw, 48px); line-height: 1; transform: translate(-50%,-50%); cursor: grab; touch-action: none; user-select: none; pointer-events: auto; display: inline-block; }
-  .sticker .del { position: absolute; top: -10px; right: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Space Grotesk'; font-weight: bold; border: 1px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+  .sticker .del { 
+    position: absolute; 
+    top: -12px; 
+    right: -12px; 
+    width: 24px; 
+    height: 24px; 
+    border-radius: 50%; 
+    background: var(--accent); 
+    color: #fff; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    font-family: 'Space Grotesk'; 
+    font-weight: bold; 
+    border: 2px solid #fff; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5); 
+    z-index: 10;
+  }
 
   .shot-preview-reel { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 8px; background: rgba(0,0,0,0.65); padding: 8px 12px; border-radius: 30px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); max-width: 90%; overflow-x: auto; }
   .shot-preview-reel img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -406,7 +425,6 @@
     state.dataConn = conn;
     conn.on('data', handleSyncData);
     conn.on('open', () => {
-      // Sync initial state when connected
       sendSync('SET_FILTER', { filter: state.filter });
       sendSync('SET_LAYOUT', { layout: state.frameStyle });
       sendSync('SET_POSE', { pose: state.poseCount });
@@ -417,7 +435,7 @@
     });
   }
 
-  /* UI CONTROL FUNCTIONS WITH SYNC */
+  /* UI CONTROL FUNCTIONS */
   function applyFilter(filterKey, notifyPeer = true) {
     state.filter = filterKey;
     document.querySelectorAll('.filter-swatch').forEach(b => {
@@ -557,7 +575,7 @@
     img.src = URL.createObjectURL(file);
   });
 
-  /* STICKER SYSTEM WITH BIDIRECTIONAL SYNC */
+  /* STICKER SYSTEM WITH STABLE REMOVAL */
   window.addStickerWithSync = function(emoji) {
     const id = 'stk_' + Math.random().toString(36).substr(2, 9);
     addSticker(emoji, id, 0.5, 0.5, true);
@@ -576,11 +594,17 @@
     const del = document.createElement('span');
     del.className = 'del';
     del.textContent = '×';
-    del.onclick = (e) => { 
+
+    // Prevent pointer drag events from intercepting the deletion click
+    const removeFn = (e) => {
+      e.preventDefault();
       e.stopPropagation(); 
       deleteStickerLocally(id);
       sendSync('DELETE_STICKER', { id });
     };
+
+    del.addEventListener('pointerdown', removeFn);
+    del.addEventListener('click', removeFn);
     
     el.appendChild(del);
     makeDraggable(el, rec);
@@ -606,7 +630,9 @@
   function deleteStickerLocally(id) {
     const index = state.stickers.findIndex(s => s.id === id);
     if (index !== -1) {
-      if (state.stickers[index].el) state.stickers[index].el.remove();
+      if (state.stickers[index].el) {
+        state.stickers[index].el.remove();
+      }
       state.stickers.splice(index, 1);
     }
   }
@@ -626,6 +652,7 @@
     const stage = document.getElementById('stage');
     
     const onStart = (e) => {
+      if(e.target.classList.contains('del')) return;
       dragging = true;
       el.setPointerCapture(e.pointerId);
     };
