@@ -6,7 +6,7 @@
 <title>SIMRAJ — Our Photobooth</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root {
@@ -72,6 +72,19 @@
     transition: transform 0.2s;
   }
   .hero-cta:hover { transform: scale(1.04); }
+
+  /* AMBIENT SIGNATURE MOMENT — soft drifting hearts behind the landing copy.
+     One deliberate, cohesive background motion for the whole landing page,
+     rather than scattered per-element effects. */
+  .drift-field { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .drift-heart { position: absolute; bottom: -60px; opacity: 0; color: var(--accent); filter: drop-shadow(0 0 6px var(--accent-glow)); animation: driftUp linear infinite; }
+  @keyframes driftUp {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.55; }
+    85%  { opacity: 0.35; }
+    100% { transform: translateY(-115vh) translateX(var(--drift-x, 30px)) rotate(20deg); opacity: 0; }
+  }
+  .nav, .hero { position: relative; z-index: 1; }
 
   /* PHOTOBOOTH APP STYLES */
   .wrap { max-width: 1300px; margin: 0 auto; padding: 20px 16px 80px; }
@@ -139,7 +152,7 @@
   .stage img.result { 
     width: 100%; 
     height: 100%; 
-    object-fit: cover; 
+    object-fit: contain; 
     display: block; 
     background: #000; 
   }
@@ -185,6 +198,15 @@
   .flash.go { animation: flashfx .35s ease-out; }
   @keyframes flashfx { from { opacity: 0.95; } to { opacity: 0; } }
 
+  /* Heart burst — the one motion moment that answers the Save action. */
+  .burst-layer { position: absolute; inset: 0; pointer-events: none; z-index: 7; overflow: hidden; }
+  .burst-heart { position: absolute; bottom: 8%; font-size: 22px; color: var(--accent); opacity: 0; animation: burstUp 1.1s ease-out forwards; }
+  @keyframes burstUp {
+    0%   { transform: translate(0,0) scale(0.4) rotate(0deg); opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translate(var(--bx,0px), -220px) scale(1.15) rotate(var(--br,15deg)); opacity: 0; }
+  }
+
   .section-label { text-align: center; font-size: 12px; font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 24px 0 10px; }
   .chip-row { display: flex; gap: 8px; justify-content: center; margin: 0 0 6px; flex-wrap: wrap; }
   .chip { border: 1px solid var(--card-border); background: var(--pill-bg); color: var(--text-muted); padding: 8px 18px; border-radius: 30px; font-size: 13px; cursor: pointer; font-family: 'Space Grotesk'; font-weight: 500; transition: all 0.2s; }
@@ -213,9 +235,11 @@
   .gallery-section { margin-top: 50px; border-top: 1px solid var(--line); padding-top: 30px; }
   .gallery-section h3 { font-family: 'Playfair Display', serif; font-size: 22px; text-align: center; margin: 0 0 16px; }
   .gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 10px; justify-content: center; }
-  .gallery-item { flex: 0 0 auto; background: #fff; padding: 8px 8px 12px; border-radius: 6px; width: 150px; color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  .gallery-item img { width: 100%; height: auto; object-fit: cover; border-radius: 2px; }
-  .gallery-item .dl { display: block; text-align: center; margin-top: 8px; font-size: 11px; color: #000; text-decoration: none; font-weight: bold; font-family: 'Space Mono', monospace; }
+  .gallery-item { flex: 0 0 auto; background: transparent; padding: 0; border-radius: 4px; width: 150px; box-shadow: 0 10px 24px rgba(0,0,0,0.45); transform: rotate(-1.5deg); transition: transform 0.2s; }
+  .gallery-item:nth-child(even) { transform: rotate(1.5deg); }
+  .gallery-item:hover { transform: rotate(0deg) scale(1.04); }
+  .gallery-item img { width: 100%; height: auto; object-fit: cover; border-radius: 4px; display: block; }
+  .gallery-item .dl { display: block; text-align: center; margin-top: 6px; font-size: 11px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-family: 'Space Mono', monospace; letter-spacing: 0.05em; }
   
   .together-panel { display: block; }
   .live-call-panel, .slotB-upload { display: none; }
@@ -228,6 +252,7 @@
 <body>
 
 <div class="screen landing active" id="landingScreen">
+  <div class="drift-field" id="driftField"></div>
   <div class="nav">
     <div class="logo">SIMRAJ</div>
     <button class="btn-pill" id="openBoothNavBtn">CLICK HERE PRINCESS 💕</button>
@@ -266,6 +291,7 @@
         <div class="shot-preview-reel" id="shotPreviewReel" style="display:none;"></div>
         <div class="countdown-num" id="countdownNum"></div>
         <div class="flash" id="flash"></div>
+        <div class="burst-layer" id="burstLayer"></div>
       </div>
     </div>
 
@@ -382,6 +408,113 @@
     cyberpunk: 'hue-rotate(180deg) saturate(1.6) contrast(1.2)'
   };
 
+  /* Same filters as above, but as an ordered list of pixel operations so we can
+     bake them into the composited photo ourselves instead of relying on the
+     canvas 2D context's `filter` property. That property isn't reliably
+     supported on every browser/device (notably older Safari/iOS), so a strip
+     saved on one phone could come out filtered while the same strip saved on
+     a partner's phone came out plain. Applying the filter pixel-by-pixel
+     guarantees the download looks the same on every device. */
+  const FILTER_OPS = {
+    normal:    [],
+    clarendon: [{op:'contrast',v:1.2},{op:'saturate',v:1.35},{op:'brightness',v:1.05},{op:'hueRotate',v:-5}],
+    warm:      [{op:'sepia',v:0.3},{op:'contrast',v:1.05},{op:'brightness',v:1.02},{op:'saturate',v:1.1}],
+    cool:      [{op:'hueRotate',v:15},{op:'contrast',v:1.05},{op:'saturate',v:0.9}],
+    golden:    [{op:'sepia',v:0.4},{op:'saturate',v:1.4},{op:'contrast',v:1.1},{op:'brightness',v:1.05}],
+    mono:      [{op:'grayscale',v:1},{op:'contrast',v:1.1}],
+    noir:      [{op:'grayscale',v:1},{op:'contrast',v:1.6},{op:'brightness',v:0.9}],
+    vintage:   [{op:'sepia',v:0.55},{op:'contrast',v:0.95},{op:'brightness',v:1.08},{op:'hueRotate',v:-10}],
+    dramatic:  [{op:'contrast',v:1.4},{op:'saturate',v:1.2},{op:'brightness',v:0.95}],
+    vivid:     [{op:'saturate',v:1.8},{op:'contrast',v:1.1}],
+    cyberpunk: [{op:'hueRotate',v:180},{op:'saturate',v:1.6},{op:'contrast',v:1.2}]
+  };
+
+  function clamp255(v) { return v < 0 ? 0 : (v > 255 ? 255 : v); }
+
+  function pxBrightness(data, amt) {
+    for (let i = 0; i < data.length; i += 4) {
+      data[i]   = clamp255(data[i]   * amt);
+      data[i+1] = clamp255(data[i+1] * amt);
+      data[i+2] = clamp255(data[i+2] * amt);
+    }
+  }
+  function pxContrast(data, amt) {
+    for (let i = 0; i < data.length; i += 4) {
+      data[i]   = clamp255((data[i]   - 128) * amt + 128);
+      data[i+1] = clamp255((data[i+1] - 128) * amt + 128);
+      data[i+2] = clamp255((data[i+2] - 128) * amt + 128);
+    }
+  }
+  function pxSaturate(data, amt) {
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const gray = 0.2126*r + 0.7152*g + 0.0722*b;
+      data[i]   = clamp255(gray + (r - gray) * amt);
+      data[i+1] = clamp255(gray + (g - gray) * amt);
+      data[i+2] = clamp255(gray + (b - gray) * amt);
+    }
+  }
+  function pxGrayscale(data, amt) {
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const gray = 0.2126*r + 0.7152*g + 0.0722*b;
+      data[i]   = clamp255(r + (gray - r) * amt);
+      data[i+1] = clamp255(g + (gray - g) * amt);
+      data[i+2] = clamp255(b + (gray - b) * amt);
+    }
+  }
+  function pxSepia(data, amt) {
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const nr = 0.393*r + 0.769*g + 0.189*b;
+      const ng = 0.349*r + 0.686*g + 0.168*b;
+      const nb = 0.272*r + 0.534*g + 0.131*b;
+      data[i]   = clamp255(r + (nr - r) * amt);
+      data[i+1] = clamp255(g + (ng - g) * amt);
+      data[i+2] = clamp255(b + (nb - b) * amt);
+    }
+  }
+  function pxHueRotate(data, deg) {
+    const rad = deg * Math.PI / 180;
+    const cos = Math.cos(rad), sin = Math.sin(rad);
+    const m = [
+      0.213 + cos*0.787 - sin*0.213, 0.715 - cos*0.715 - sin*0.715, 0.072 - cos*0.072 + sin*0.928,
+      0.213 - cos*0.213 + sin*0.143, 0.715 + cos*0.285 + sin*0.140, 0.072 - cos*0.072 - sin*0.283,
+      0.213 - cos*0.213 - sin*0.787, 0.715 - cos*0.715 + sin*0.715, 0.072 + cos*0.928 + sin*0.072
+    ];
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2];
+      data[i]   = clamp255(r*m[0] + g*m[1] + b*m[2]);
+      data[i+1] = clamp255(r*m[3] + g*m[4] + b*m[5]);
+      data[i+2] = clamp255(r*m[6] + g*m[7] + b*m[8]);
+    }
+  }
+
+  function applyFilterToImageData(imageData, filterKey) {
+    const ops = FILTER_OPS[filterKey];
+    if (!ops || !ops.length) return;
+    const data = imageData.data;
+    ops.forEach(o => {
+      switch (o.op) {
+        case 'contrast':   pxContrast(data, o.v); break;
+        case 'saturate':   pxSaturate(data, o.v); break;
+        case 'brightness': pxBrightness(data, o.v); break;
+        case 'grayscale':  pxGrayscale(data, o.v); break;
+        case 'sepia':      pxSepia(data, o.v); break;
+        case 'hueRotate':  pxHueRotate(data, o.v); break;
+      }
+    });
+  }
+
+  // Bakes the named filter directly into a canvas's pixels (in place).
+  function applyNamedFilterToCanvas(canvas, filterKey) {
+    if (!filterKey || filterKey === 'normal') return;
+    const c = canvas.getContext('2d');
+    const id = c.getImageData(0, 0, canvas.width, canvas.height);
+    applyFilterToImageData(id, filterKey);
+    c.putImageData(id, 0, 0);
+  }
+
   const landingScreen = document.getElementById('landingScreen');
   const appScreen = document.getElementById('appScreen');
   const liveVideo = document.getElementById('liveVideo');
@@ -392,6 +525,37 @@
   const ctx = workCanvas.getContext('2d');
   let activeCountdownResolver = null;
   let lastDataURL = null;
+
+  // Preload the handwriting font early so it's ready by the time the first
+  // photo strip is composed (countdowns give it several seconds of runway).
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load("700 64px 'Caveat'").catch(() => {});
+  }
+
+  // Populate the landing page's one signature ambient moment: a handful of
+  // hearts drifting upward at varied size/speed/position, purely decorative.
+  (function seedDriftField(){
+    const field = document.getElementById('driftField');
+    if (!field) return;
+    const glyphs = ['💗', '✨', '💌'];
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('span');
+      el.className = 'drift-heart';
+      el.textContent = glyphs[i % glyphs.length];
+      const left = Math.random() * 100;
+      const size = 14 + Math.random() * 20;
+      const duration = 10 + Math.random() * 9;
+      const delay = Math.random() * duration;
+      const driftX = (Math.random() * 80 - 40) + 'px';
+      el.style.left = left + '%';
+      el.style.fontSize = size + 'px';
+      el.style.animationDuration = duration + 's';
+      el.style.animationDelay = '-' + delay + 's';
+      el.style.setProperty('--drift-x', driftX);
+      field.appendChild(el);
+    }
+  })();
 
   function openBooth() {
     landingScreen.classList.remove('active');
@@ -767,6 +931,7 @@
     c.width = 120; c.height = 120;
     const context = c.getContext('2d');
     drawPairIntoRect(context, 0, 0, 120, 120, frame.a, frame.b, state.frameStyle);
+    applyNamedFilterToCanvas(c, state.filter);
     return c.toDataURL();
   }
 
@@ -781,11 +946,16 @@
     /* Matches the 16:9 stage layout aspect ratio */
     const W = 1600;
     const H = 900;
-    workCanvas.width = W;
-    workCanvas.height = H;
 
-    ctx.fillStyle = "#141619";
-    ctx.fillRect(0, 0, W, H);
+    // Compose the photo grid itself onto an offscreen canvas first, exactly
+    // as before, then frame that as a Polaroid keepsake below.
+    const shot = document.createElement('canvas');
+    shot.width = W;
+    shot.height = H;
+    const sctx = shot.getContext('2d');
+
+    sctx.fillStyle = "#141619";
+    sctx.fillRect(0, 0, W, H);
 
     const pad = 24;
     const contentW = W - (pad * 2);
@@ -795,9 +965,6 @@
     const cellW = (contentW - (cols - 1) * gap) / cols;
     const cellH = (contentH - (rows - 1) * gap) / rows;
 
-    ctx.save();
-    if(FILTERS[state.filter]) ctx.filter = FILTERS[state.filter];
-
     for(let i = 0; i < state.poseCount; i++){
       const r = Math.floor(i / cols);
       const c = i % cols;
@@ -806,15 +973,50 @@
 
       if (i < framesData.length) {
         const frame = framesData[i];
-        drawPairIntoRect(ctx, cx, cy, cellW, cellH, frame.a, frame.b, state.frameStyle);
+        drawPairIntoRect(sctx, cx, cy, cellW, cellH, frame.a, frame.b, state.frameStyle);
       }
     }
+
+    // Bake the filter into the pixels directly (not ctx.filter) so the
+    // downloaded strip looks identical on every device, regardless of
+    // that browser's canvas filter support.
+    if (state.filter !== 'normal') {
+      const region = sctx.getImageData(pad, pad, contentW, contentH);
+      applyFilterToImageData(region, state.filter);
+      sctx.putImageData(region, pad, pad);
+    }
+
+    sctx.font = `${W * 0.045}px sans-serif`;
+    state.stickers.forEach(s => {
+      sctx.fillText(s.emoji, pad + s.xPct * contentW, pad + s.yPct * contentH);
+    });
+
+    // --- Polaroid keepsake frame ---
+    // A cream paper border around the shot, with a handwritten caption in
+    // the bottom strip — the one deliberate signature look for every photo
+    // this booth produces, tying the output back to what it actually is:
+    // a personal, dated memory rather than a plain screenshot.
+    const border = Math.round(W * 0.032);
+    const captionH = Math.round(H * 0.17);
+    workCanvas.width = W + border * 2;
+    workCanvas.height = H + border * 2 + captionH;
+
+    ctx.fillStyle = '#f7f0e7';
+    ctx.fillRect(0, 0, workCanvas.width, workCanvas.height);
+    // faint paper edge shadow so the frame doesn't look flat
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 18;
+    ctx.drawImage(shot, border, border);
     ctx.restore();
 
-    ctx.font = `${W * 0.045}px sans-serif`;
-    state.stickers.forEach(s => {
-      ctx.fillText(s.emoji, pad + s.xPct * contentW, pad + s.yPct * contentH);
-    });
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const captionY = border * 2 + H + captionH * 0.62;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#c2436b';
+    ctx.font = `700 ${Math.round(captionH * 0.5)}px 'Caveat', cursive`;
+    ctx.fillText(`simraj  ♡  ${dateStr}`, workCanvas.width / 2, captionY);
+    ctx.textAlign = 'left';
 
     return workCanvas.toDataURL('image/jpeg', 0.95);
   }
@@ -941,8 +1143,26 @@
     shotPreviewReel.innerHTML = '';
   });
 
+  function burstHearts() {
+    const layer = document.getElementById('burstLayer');
+    if (!layer) return;
+    const glyphs = ['💗', '💖', '✨'];
+    for (let i = 0; i < 10; i++) {
+      const el = document.createElement('span');
+      el.className = 'burst-heart';
+      el.textContent = glyphs[i % glyphs.length];
+      el.style.left = (35 + Math.random() * 30) + '%';
+      el.style.setProperty('--bx', (Math.random() * 140 - 70) + 'px');
+      el.style.setProperty('--br', (Math.random() * 50 - 25) + 'deg');
+      el.style.animationDelay = (Math.random() * 0.2) + 's';
+      layer.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
   document.getElementById('saveBtn').addEventListener('click', () => {
     if(!lastDataURL) return;
+    burstHearts();
     const gallery = document.getElementById('gallery');
     const item = document.createElement('div');
     item.className = 'gallery-item';
