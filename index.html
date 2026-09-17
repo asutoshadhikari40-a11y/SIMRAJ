@@ -171,9 +171,11 @@
   .shot-preview-reel img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: clamp(60px, 12vw, 110px); font-weight: 700; color: #fff; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); z-index: 5; text-align: center; flex-direction: column; }
+  /* Countdown overlay no longer blurs the camera behind it — background dimmed only,
+     the live video underneath stays sharp while the timer is ticking. */
+  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: clamp(60px, 12vw, 110px); font-weight: 700; color: #fff; background: rgba(0,0,0,0.35); z-index: 5; text-align: center; flex-direction: column; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
   .countdown-num.show { display: flex; }
-  .countdown-num span { font-size: 16px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; padding: 0 10px; }
+  .countdown-num span { font-size: 16px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; padding: 0 10px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
   
   .skip-timer-btn { margin-top: 20px; background: linear-gradient(135deg, #ff758c, #ff7eb3); color: #fff; border: none; padding: 10px 24px; border-radius: 30px; font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 4px 15px var(--accent-glow); pointer-events: auto; transition: transform 0.2s; }
   .skip-timer-btn:hover { transform: scale(1.05); }
@@ -453,6 +455,9 @@
         triggerPhotoSequence(false);
         break;
       case 'SKIP_TIMER':
+        // Resolve THIS side's countdown the same way a local click would
+        // (clears the interval + hides the overlay), so one "ready" tap
+        // from either person ends the wait for both, cleanly.
         if(activeCountdownResolver) activeCountdownResolver();
         break;
     }
@@ -826,24 +831,39 @@
     };
   }
 
+  /* Fixed: the resolver stored in activeCountdownResolver now always runs the
+     FULL cleanup (clear interval + hide overlay) before resolving — whether
+     it's triggered locally (by the timer finishing) or remotely (the other
+     person tapped "Ready Now!"). Previously activeCountdownResolver was the
+     bare Promise resolve function, so a remote skip resolved the Promise but
+     left the interval running and the overlay visible on that side — the
+     stray, still-ticking overlay was what showed as a blurry/glitchy camera
+     during capture. A `done` guard makes it safe to call cleanUp() twice
+     (e.g. local skip + a stray late SKIP_TIMER echo). */
   function countdown(sec, labelText, allowSkip = false) {
     return new Promise(resolve => {
-      activeCountdownResolver = resolve;
       const el = document.getElementById('countdownNum');
       let c = sec;
-      
+      let done = false;
+
       let skipBtnHTML = allowSkip ? `<button class="skip-timer-btn" id="skipTimerBtn">Ready Now! ✨</button>` : '';
       el.innerHTML = `${c}<span>${labelText}</span>${skipBtnHTML}`;
       el.classList.add('show');
-      
+
       let timer = null;
 
       const cleanUp = () => {
+        if (done) return;
+        done = true;
         clearInterval(timer);
         el.classList.remove('show');
         activeCountdownResolver = null;
         resolve();
       };
+
+      // Store the real cleanup function, not the bare resolve — this is
+      // what a SKIP_TIMER message from the other person calls.
+      activeCountdownResolver = cleanUp;
 
       const bindSkip = () => {
         if(!allowSkip) return;
