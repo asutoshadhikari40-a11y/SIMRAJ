@@ -75,7 +75,7 @@
 
   /* PHOTOBOOTH APP STYLES */
   .wrap { max-width: 1300px; margin: 0 auto; padding: 20px 16px 80px; }
-  header { text-align: center; margin-bottom: 24px; }
+  header { position: sticky; top: 0; z-index: 20; text-align: center; margin-bottom: 24px; padding: 14px 0 10px; background: rgba(11, 12, 16, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
   header .kicker { font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent); display: block; margin-bottom: 6px; }
   header h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 5vw, 42px); font-weight: 700; margin: 0 0 6px; }
 
@@ -172,8 +172,9 @@
   @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
   /* Countdown overlay no longer blurs the camera behind it — background dimmed only,
-     the live video underneath stays sharp while the timer is ticking. */
-  .countdown-num { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: clamp(60px, 12vw, 110px); font-weight: 700; color: #fff; background: rgba(0,0,0,0.35); z-index: 5; text-align: center; flex-direction: column; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+     the live video underneath stays sharp while the timer is ticking. Pinned to the
+     top of the stage (not centered) so it never covers faces in the middle of frame. */
+  .countdown-num { position: absolute; inset: 0; display: none; align-items: flex-start; justify-content: center; padding-top: 28px; font-size: clamp(48px, 9vw, 88px); font-weight: 700; color: #fff; background: rgba(0,0,0,0.22); z-index: 5; text-align: center; flex-direction: column; text-shadow: 0 2px 12px rgba(0,0,0,0.8); pointer-events: none; }
   .countdown-num.show { display: flex; }
   .countdown-num span { font-size: 16px; font-family: 'Space Mono', monospace; margin-top: 12px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em; color: #ffb6c1; padding: 0 10px; text-shadow: 0 1px 6px rgba(0,0,0,0.9); }
   
@@ -395,6 +396,7 @@
   function openBooth() {
     landingScreen.classList.remove('active');
     appScreen.classList.add('active');
+    window.scrollTo(0, 0);
     initCamera();
     
     if(state.stickers.length === 0) {
